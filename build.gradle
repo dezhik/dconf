@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+group 'com.dezhik'
+version '0.4.1-SNAPSHOT'
+
+sourceCompatibility = 12
+
+repositories {
+    mavenCentral()
+    maven {
+        name "JBoss Public Maven Repository Group"
+        url "http://repository.jboss.org/nexus/content/groups/public/"
+    }
+}
+
+ext {
+    springVersion = '5.1.5.RELEASE'
+    jacksonVersion = '2.9.1'
+}
+
+dependencies {
+    implementation group: 'org.mongodb', name: 'mongodb-driver', version: '3.9.1'
+    implementation 'commons-httpclient:commons-httpclient:3.1'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'org.springframework', name: 'spring-context', version: "$springVersion"
+    implementation group: 'org.springframework', name: 'spring-core', version: "$springVersion"
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    implementation 'org.apache.httpcomponents:fluent-hc:4.5.10'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+    implementation "javax.servlet.jsp:jsp-api:2.2"
+    implementation "javax.servlet:jstl:1.2"
+    implementation "javax.validation:validation-api:2.0.1.Final"
+    implementation "javax.annotation:javax.annotation-api:1.3.2"
+    implementation "org.glassfish:javax.el:3.0.0"
+
+    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+
+    implementation group: 'tanukisoft', name: 'wrapper', version: '3.2.3'
+
+
+    testImplementation 'junit:junit:4.12'
+    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'org.jetbrains:annotations:15.0'
+}
+
+sourceSets.test.java.srcDirs = ['src/test/java']
+
+test {
+    useJUnit()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+    dependsOn 'cleanTest'
+}
+
+task getDeps(type: Copy) {
+    from sourceSets.main.runtimeClasspath
+    into 'runtime/'
+}

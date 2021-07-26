@@ -1,0 +1,7 @@
+gradle/*
+.gradle/*
+.idea/*
+runtime/*
+out/*
+gradlew*
+build/*
