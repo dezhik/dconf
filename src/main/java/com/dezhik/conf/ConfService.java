@@ -49,21 +49,26 @@ public class ConfService {
         // initial loading should be synced with service start-up
         // local files goes first and are loaded once at startup, w/o dynamic runtime reloading
         final UpdatesLoader classpathLoader = new FSUpdatesLoader("classpath://conf/app.properties");
-        loadAndProcess(classpathLoader, false);
+        final int cpCount = loadAndProcess(classpathLoader, false);
 
 
         final UpdatesLoader dynamicLoader = new FSUpdatesLoader("/tmp/conf");
         final long now = System.currentTimeMillis();
-        final int count = loadAndProcess(dynamicLoader, false);
-        log.info("ConfService initial loading completed in {} ms, found {} properties. lastUpdateTime {}",
-                (System.currentTimeMillis() - now), count, values.lastUpdateTime);
+        final int fsCount = loadAndProcess(dynamicLoader, false);
+
+        final UpdatesLoader mongoLoader = new MongoUpdatesLoader();
+        final int totalCount = cpCount + fsCount + loadAndProcess(mongoLoader, true);
+        log.info("ConfService initial loading completed in {} ms, found in classpath {}, in fs {}, total {} properties. lastUpdateTime {}",
+                (System.currentTimeMillis() - now), cpCount, fsCount, totalCount, values.lastUpdateTime);
+
+
 
         Thread updater = new Thread(() -> {
             try {
                 log.info("ConfService updater has been started.");
                 while (true) {
                     Thread.sleep(TimeUnit.SECONDS.toMillis(10));
-                    loadAndProcess(dynamicLoader, true);
+                    loadAndProcess(mongoLoader, true);
                 }
             } catch (InterruptedException e) {
                 log.info("ConfService terminated.");

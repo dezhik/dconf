@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'maven-publish'
 }
 
 idea {
@@ -10,7 +11,7 @@ idea {
 }
 
 group 'com.dezhik'
-version '0.4.1-SNAPSHOT'
+version '0.0.1-SNAPSHOT'
 
 sourceCompatibility = 12
 
@@ -19,6 +20,17 @@ repositories {
     maven {
         name "JBoss Public Maven Repository Group"
         url "http://repository.jboss.org/nexus/content/groups/public/"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
     }
 }
 

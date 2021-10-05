@@ -47,6 +47,6 @@ public class MongoUpdatesLoader implements UpdatesLoader {
             newLastUpdateTime = Math.max(newLastUpdateTime, entity.getLong("upt"));
         }
 
-        return new ConfValues(newValues, lastUpdateTime);
+        return new ConfValues(newValues, newLastUpdateTime);
     }
 }

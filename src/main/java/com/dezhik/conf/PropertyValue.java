@@ -39,7 +39,7 @@ public class PropertyValue<T> {
     }
 
     public synchronized List<Callable> getOnChangeListeners() {
-        return Collections.unmodifiableList(listeners);
+        return listeners == null ? Collections.emptyList() : Collections.unmodifiableList(listeners);
     }
 
     public synchronized void onChange(Callable callback) {
