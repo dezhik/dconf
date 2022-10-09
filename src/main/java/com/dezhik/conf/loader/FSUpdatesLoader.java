@@ -1,4 +1,4 @@
-package com.dezhik.conf;
+package com.dezhik.conf.loader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,14 +13,10 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
-
+import com.dezhik.conf.client.ConfValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author ilya.dezhin
- */
 public class FSUpdatesLoader implements UpdatesLoader {
     private static final String CLASSPATH_PREFIX = "classpath://";
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -32,28 +28,33 @@ public class FSUpdatesLoader implements UpdatesLoader {
     }
 
     @Override
-    public @NotNull ConfValues getUpdates(final long lastUpdateTime) {
+    public Map<String, ConfValues> getUpdates(List<String> modules, final long lastUpdateTime) {
         log.info("Trying read conf from " + path);
         if (path == null) {
             log.warn("No valid conf url provided");
-            return ConfValues.EMPTY;
+            return Collections.emptyMap();
         }
 
         if (path.startsWith(CLASSPATH_PREFIX)) {
             Properties props = new Properties();
             InputStream in = FSUpdatesLoader.class.getClassLoader().getResourceAsStream(path.substring(CLASSPATH_PREFIX.length()));
-            try {
-                props.load(in);
-            } catch (IOException e) {
-                log.error("classpath read io", e);
+            if (in == null) {
+                log.info("fs path not found, skip loading");
+                return Collections.singletonMap("fsLoader", ConfValues.EMPTY);
+            } else {
+                try {
+                    props.load(in);
+                } catch (IOException e) {
+                    log.error("classpath read io", e);
+                }
+                log.info("Processed " + path + " total properties loaded: " + props.size());
+                return Collections.singletonMap("fsLoader", new ConfValues(new HashMap<String, String>((Map) props), lastUpdateTime));
             }
-            log.info("Processed " + path + " total properties loaded: " + props.size());
-            return new ConfValues(new HashMap<String, String>((Map) props), lastUpdateTime);
         }
 
         final List<File> confFiles = getFilesToProcess(path, lastUpdateTime);
         if (confFiles.isEmpty()) {
-            return ConfValues.EMPTY;
+            return Collections.emptyMap();
         }
 
         Properties props = new Properties();
@@ -68,7 +69,7 @@ public class FSUpdatesLoader implements UpdatesLoader {
             log.info("Processed " + conf.toURI() + " file, total properties loaded: " + props.size());
         }
 
-        return new ConfValues(new HashMap<String, String>((Map) props), newLastUpdateTime);
+        return Collections.singletonMap("fsLoader", new ConfValues(new HashMap<String, String>((Map) props), newLastUpdateTime));
     }
 
     private List<File> getFilesToProcess(String path, long lastUpdateTime) {

@@ -1,10 +1,12 @@
-package com.dezhik.conf;
+package com.dezhik.conf.loader;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
 
+import com.dezhik.conf.client.ConfValues;
 import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
@@ -13,16 +15,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 
-/**
- * @author ilya.dezhin
- */
 public class MongoUpdatesLoader implements UpdatesLoader {
 
     private final MongoCollection<Document> collection;
 
     public MongoUpdatesLoader() {
-        String dbUrl = System.getProperty("confDbUrl") != null ? System.getProperty("confDbUrl") : "mongodb://127.0.0.1:27017";
-        String dbName = System.getProperty("confDbName") != null ? System.getProperty("confDbName") : "custos";
+        String dbUrl = System.getProperty("mongodb.url") != null ? System.getProperty("mongodb.url") : "mongodb://127.0.0.1:27017";
+        String dbName = System.getProperty("mongodb.url") != null ? System.getProperty("mongodb.url") : "custos";
         MongoClient mongoClient = MongoClients.create(dbUrl);
         collection = mongoClient
                 .getDatabase(dbName)
@@ -34,7 +33,7 @@ public class MongoUpdatesLoader implements UpdatesLoader {
     }
 
     @Override
-    public @NotNull ConfValues getUpdates(final long lastUpdateTime) {
+    public Map<String, ConfValues> getUpdates(List<String> modules, final long lastUpdateTime) {
         final MongoCursor<Document> res = collection
                 .find(Filters.gt("upt", lastUpdateTime))
                 .iterator();
@@ -47,6 +46,6 @@ public class MongoUpdatesLoader implements UpdatesLoader {
             newLastUpdateTime = Math.max(newLastUpdateTime, entity.getLong("upt"));
         }
 
-        return new ConfValues(newValues, newLastUpdateTime);
+        return Collections.singletonMap("mongoLoader", new ConfValues(newValues, newLastUpdateTime));
     }
 }
