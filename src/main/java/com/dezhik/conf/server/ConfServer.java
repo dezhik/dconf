@@ -56,7 +56,6 @@ public class ConfServer {
         server.addConnector(connector);
         // SslConnectionFactory
 
-//        ContextHandlerCollection contextCollection = new ContextHandlerCollection();
         HandlerList contextCollection = new HandlerList();
         server.setHandler(contextCollection);
         // empty error handler
@@ -67,7 +66,6 @@ public class ConfServer {
         // Specify the source where the template files come from. Here I set a
         // plain directory for it, but non-file-system sources are possible too:
         fmCfg.setClassForTemplateLoading(IndexHandler.class, "/");
-
         fmCfg.setDefaultEncoding("UTF-8");
 
         ContextHandler newContext = new ContextHandler("/new");

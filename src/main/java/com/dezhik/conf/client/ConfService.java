@@ -1,25 +1,26 @@
 package com.dezhik.conf.client;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import com.dezhik.conf.converter.Converter;
 import com.dezhik.conf.loader.FSUpdatesLoader;
 import com.dezhik.conf.loader.UpdatesLoader;
 import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sun.misc.Unsafe;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author ilya.dezhin
@@ -51,14 +52,14 @@ public class ConfService {
     private final UpdatesLoader mainLoader;
 
     public ConfService(UpdatesLoader loader) {
-        this(loader, 10);
+        this(loader, 5);
     }
 
     public ConfService(UpdatesLoader loader, int reloadDelaySec) {
         this.mainLoader = loader;
         this.reloadDelayMs = TimeUnit.SECONDS.toMillis(reloadDelaySec);
 
-        this.startupSyncRequired = "false".equalsIgnoreCase(System.getProperty("conf.startup.sync.required"));
+        this.startupSyncRequired = !"false".equalsIgnoreCase(System.getProperty("conf.startup.sync.required"));
 
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");

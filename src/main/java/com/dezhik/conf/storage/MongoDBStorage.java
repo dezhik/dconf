@@ -50,7 +50,7 @@ public class MongoDBStorage implements Storage {
 
     public MongoDBStorage() {
         String dbUrl = System.getProperty("mongodb.url") != null ? System.getProperty("mongodb.url") : "mongodb://127.0.0.1:27017";
-        String dbName = System.getProperty("mongodb.name") != null ? System.getProperty("mongodb.url") : "conf";
+        String dbName = System.getProperty("mongodb.name") != null ? System.getProperty("mongodb.name") : "conf";
         collectionName = System.getProperty("mongodb.collection.name") != null ? System.getProperty("mongodb.collection.name") : "conf";
 
         MongoClientSettings.Builder settingsBuilder = MongoClientSettings.builder()
@@ -61,9 +61,8 @@ public class MongoDBStorage implements Storage {
             settingsBuilder.credential(MongoCredential.createCredential(dbUser, dbName, dbPassword.toCharArray()));
         }
 
-        log.info("Mongodb initialization started.");
+        log.info("MongoDB initialization started.");
         final MongoClient mongoClient = MongoClients.create(settingsBuilder.build());
-        log.info("Mongodb initialization completed.");
 
         collection = mongoClient
                 .getDatabase(dbName)
@@ -82,6 +81,8 @@ public class MongoDBStorage implements Storage {
                 Indexes.ascending(COLUMN_MODULE, COLUMN_HOST, COLUMN_NAME),
                 new IndexOptions().unique(true).sparse(true)
         );
+
+        log.info("MongoDB initialization completed.");
     }
 
     private Bson constructFindQueryByFilter(PropertyFilter filter) {

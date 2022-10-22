@@ -38,7 +38,8 @@ publishing {
 
         clientLib(MavenPublication) { // publishClientLibPublicationToMavenLocal
             artifactId = 'dconf-client'
-            artifact clientJar}
+            artifact clientJar
+        }
     }
     repositories {
         mavenLocal()
@@ -67,7 +68,7 @@ dependencies {
 
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation group: "de.flapdoodle.embed", name: "de.flapdoodle.embed.mongo", version: "3.4.6"
+    testImplementation group: "de.flapdoodle.embed", name: "de.flapdoodle.embed.mongo", version: "3.5.0"
 }
 
 sourceSets.test.java.srcDirs = ['src/test/java']
@@ -82,8 +83,11 @@ test {
 
 
 tasks.register('getDeps', Copy) {
+    dependsOn jar
     var destDir = project.hasProperty("depDest") ? depDest : "runtime/";
-    println "Moving dependencies into $destDir directory"
+    println "Moving jar & dependencies into $destDir directory."
+    from 'build/libs'
     from sourceSets.main.runtimeClasspath
+    include '*.jar'
     into destDir
 }
